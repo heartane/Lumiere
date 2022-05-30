@@ -125,6 +125,30 @@ const getUserInfo = async (corp, url, token) => {
   return res.data;
 };
 
+// 권한 제공 기관에서 준 유저 정보를 알맞게 가공하기
+const setUserInfoByCorp = (corp, userInfo) => {
+  let uuid;
+  let email;
+  let name;
+
+  if (corp === 'google') {
+    uuid = userInfo.sub;
+    email = userInfo.email;
+    name = userInfo.name;
+  }
+  if (corp === 'kakao') {
+    uuid = userInfo.id;
+    email = userInfo.kakao_account.email;
+    name = userInfo.kakao_account.profile.nickname;
+  }
+  if (corp === 'naver') {
+    uuid = userInfo.response.id;
+    email = userInfo.response.email;
+    name = userInfo.response.name;
+  }
+  return { uuid, email, name };
+};
+
 // 토큰 갱신
 const updateAccessToken = async (options, grantType) => {
   const res = await axios.post(
@@ -164,6 +188,7 @@ const revokeAccess = async (corp, token) => {
 
 export {
   getUserInfo,
+  setUserInfoByCorp,
   getAccessToken,
   updateAccessToken,
   getOption,

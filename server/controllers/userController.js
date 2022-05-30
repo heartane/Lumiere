@@ -11,6 +11,7 @@ import {
   getOption,
   getUserInfo,
   revokeAccess,
+  setUserInfoByCorp,
   updateAccessToken,
 } from '../utils/oAuth.js';
 
@@ -106,25 +107,8 @@ const oAuthLogin = asyncHandler(async (req, res) => {
   const token = await getAccessToken(options, 'authorization_code');
   const userInfo = await getUserInfo(corp, options.userInfo_url, token);
 
-  let uuid;
-  let email;
-  let name;
+  const { uuid, email, name } = setUserInfoByCorp(corp, userInfo);
 
-  if (corp === 'google') {
-    uuid = userInfo.sub;
-    email = userInfo.email;
-    name = userInfo.name;
-  }
-  if (corp === 'kakao') {
-    uuid = userInfo.id;
-    email = userInfo.kakao_account.email;
-    name = userInfo.kakao_account.profile.nickname;
-  }
-  if (corp === 'naver') {
-    uuid = userInfo.response.id;
-    email = userInfo.response.email;
-    name = userInfo.response.name;
-  }
   // DB와 연락하기
   const { access_token, refresh_token } = token;
   const user = await User.findOneAndUpdate(
